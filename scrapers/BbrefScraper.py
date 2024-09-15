@@ -3,8 +3,10 @@ import certifi
 import json
 import os
 import ssl
+from urllib.error import HTTPError, URLError
 import urllib.request as request
-from urllib.parse import parse_qs, urlparse
+from dotenv import load_dotenv
+from pymongo import MongoClient
 from bs4 import BeautifulSoup as bs
 from constants.columns import METRICS_CATEGORIES, METRICS_STATS_HEADERS
 
@@ -17,24 +19,31 @@ class BbrefScraper:
         self.end = kwargs['end']
         self.debug = kwargs['debug']
 
+        if not self.debug:
+            load_dotenv()
+            mongo_user = os.getenv('MONGO_USER')
+            mongo_pass = os.getenv('MONGO_PASSWORD')
+            mongo_connection = os.getenv('MONGO_CONNECTION_STRING').format(mongo_user=mongo_user, mongo_password=mongo_pass)
+            self.mdb = MongoClient(mongo_connection, tls=True, tlsCAFile=certifi.where())
+
     def scrape_player_metrics_from_url(self):
         stat_metric = METRICS_CATEGORIES[self.metric_key]['name']
 
         urls = [{'year': year, 'url': f'{self.base_url}leagues/NBA_{year}_{stat_metric}.html'} for year in range(self.start, self.end+1)]
         for url in urls:
             print(f'fetching from: {url}')
-            per_player_stats_html = request.urlopen(url['url'], context=self.ssl).read().decode('utf-8')
-            year = url['year']
+            try:
+                per_player_stats_html = request.urlopen(url['url'], context=self.ssl).read().decode('utf-8')
+                year = url['year']
 
-            if self.debug:
-                htmls_dir = f'files/html/{year}'
-                if not os.path.exists(htmls_dir):
-                    os.makedirs(htmls_dir)
-                with open(f'{htmls_dir}/players_{self.metric_key}_{year}.html', 'w') as stats_html:
-                    print(f'saving {year} {self.metric_key} html')
-                    stats_html.write(per_player_stats_html)
-            
-            self.__parse_player_data_html(per_player_stats_html, year)
+                if self.debug:
+                    self.save_html_to_file(per_player_stats_html, year)
+                
+                self.__parse_player_data_html(per_player_stats_html, year)
+            except HTTPError as e:
+                print(f'HTTPError: {e.code} - {e.reason}')
+            except URLError as e:
+                print(f'URLError: {e.reason}')
 
     def scrape_player_metrics_from_html(self):
         files = [{'file': f'files/html/{year}/players_{self.metric_key}_{year}.html', 'year': year} for year in range(self.start, self.end+1)]
@@ -49,6 +58,7 @@ class BbrefScraper:
                 print(f'{f} was not found. skipping')
     
     def __parse_player_data_html(self, html, year: int):
+        print(f'parsing {year} {self.metric_key} stats')
         html_soup = bs(html, 'html.parser')
         metric_identifier = METRICS_CATEGORIES[self.metric_key]['identifier']
         table = html_soup.find(id=f'{metric_identifier}_stats')
@@ -60,17 +70,38 @@ class BbrefScraper:
             position = p_row.find_all('td', attrs={'data-stat': 'pos'})
             stats = p_row.find_all('td', attrs={'data-stat': lambda stat: stat in METRICS_STATS_HEADERS[self.metric_key]['stats']})
             player_stats.append({
+                'season': year,
                 'name': player_name[0].text,
                 'position': position[0].text,
                 'stats': {stat.get('data-stat'): float(stat.text) if stat.text else '' for stat in stats}
             })
         if self.debug:
-            stats_dir = f'files/stats/{year}'
-            if not os.path.exists(stats_dir):
-                os.makedirs(stats_dir)
-            with open(f'{stats_dir}/{self.metric_key}.json', 'w') as stats_file:
-                print(f'saving {year} {self.metric_key} stats json')
-                json.dump(player_stats, stats_file)
+            self.save_json_to_file(player_stats, year)
+        else:
+            self.__save_to_db(player_stats)
+
+    def __save_to_db(self, documents):
+        print('saving to db')
+        db = self.mdb['per_season_stats']
+        collection = db[self.metric_key]
+        doc_ids = collection.insert_many(documents)
+        print(f'saved {len(doc_ids.inserted_ids)} rows')
+
+    def save_html_to_file(self, html, year):
+        htmls_dir = f'files/html/{self.metric_key}'
+        if not os.path.exists(htmls_dir):
+            os.makedirs(htmls_dir)
+        with open(f'{htmls_dir}/{year}.html', 'w') as stats_html:
+            print(f'saving {year} {self.metric_key} html')
+            stats_html.write(html)
+    
+    def save_json_to_file(self, stats_json, year):
+        stats_dir = f'files/stats/{self.metric_key}'
+        if not os.path.exists(stats_dir):
+            os.makedirs(stats_dir)
+        with open(f'{stats_dir}/{year}.json', 'w') as stats_file:
+            print(f'saving {year} {self.metric_key} stats json')
+            json.dump(stats_json, stats_file)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='args for player stat parsing')
