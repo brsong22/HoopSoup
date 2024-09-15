@@ -68,7 +68,7 @@ class BbrefScraper:
         for p_row in rows:
             player_name = p_row.find_all('td', attrs={'data-stat': 'name_display'})
             position = p_row.find_all('td', attrs={'data-stat': 'pos'})
-            stats = p_row.find_all('td', attrs={'data-stat': lambda stat: stat in METRICS_STATS_HEADERS[self.metric_key]['stats']})
+            stats = p_row.find_all('td', attrs={'data-stat': lambda stat: stat in METRICS_STATS_HEADERS[METRICS_CATEGORIES[self.metric_key]['name']]['stats']})
             player_stats.append({
                 'season': year,
                 'name': player_name[0].text,
