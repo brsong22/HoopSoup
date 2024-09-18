@@ -1,269 +1,102 @@
+from mongoengine.fields import DictField, FloatField, IntField, StringField
+
+TOTALS_METRIC = 'totals'
+PER_G_METRIC = 'per_g'
+PER_M_METRIC = 'per_m'
+PER_P_METRIC = 'per_p'
+ADV_METRIC = 'adv'
+PBP_METRIC = 'pbp'
+SHOOTING_METRIC = 'shooting'
+ADV_SHOOTING_METRIC = 'adv_shooting'
+
 METRICS_CATEGORIES = {
-    'totals': {
+    TOTALS_METRIC: {
         'identifier': 'totals',
         'name': 'totals'
     },
-    'per_g': {
+    PER_G_METRIC: {
         'identifier': 'per_game',
         'name': 'per_game'
     },
-    'per_m': {
+    PER_M_METRIC: {
         'identifier': 'per_minute',
         'name': 'per_minute'
     },
-    'per_p': {
+    PER_P_METRIC: {
         'identifier': 'per_poss',
         'name': 'per_poss'
     },
-    'adv': {
+    ADV_METRIC: {
         'identifier': 'advanced',
         'name': 'advanced'
     },
-    'pbp': {
+    PBP_METRIC: {
         'identifier': 'pbp',
         'name': 'play-by-play'
     },
-    'shooting': {
+    SHOOTING_METRIC: {
         'identifier': 'shooting',
         'name': 'shooting'
     },
-    'adv_shooting': {
+    ADV_SHOOTING_METRIC: {
         'identifier': 'adv_shooting',
         'name': 'adv_shooting'
     }
 }
 
-METRICS_STATS_HEADERS = {
-    METRICS_CATEGORIES['totals']['name']: {
-        'name': 'Totals',
-        'description': 'Season Totals',
-        'stats': {
-            'fg': {
-                'name': 'Field Goals',
-                'abbreviation': 'FG',
-                'description': 'Field Goals made'
-            },
-            'fga': {
-                'name': 'Field Goal Attempts',
-                'abbreviation': 'FGA',
-                'description': 'Field Goals attempted'
-            },
-            'fg_pct': {
-                'name': 'Field Goal Percentage',
-                'abbreviation': 'FG%',
-                'description': 'Percent of Field Goals made'
-            },
-            'fg3': {
-                'name': '3-Point Field Goals',
-                'abbreviation': '3P',
-                'description': '3-Point Field Goals made'
-            },
-            'fg3a': {
-                'name': '3-Point Field Goal Attempts',
-                'abbreviation': '3PA',
-                'description': '3-Point Field Goals attempted'
-            },
-            'fg3_pct': {
-                'name': '3-Point Field Goal Percentage',
-                'abbreviation': '3P%',
-                'description': 'Percent of 3-Point Field Goals made'
-            },
-            'fg2': {
-                'name': '2-Point Field Goals',
-                'abbreviation': '2P',
-                'description': '2-Point Field Goals made'
-            },
-            'fg2a': {
-                'name': '2-Point Field Goal Attempts',
-                'abbreviation': '2PA',
-                'description': '2-Point Field Goals attempted'
-            },
-            'fg2_pct': {
-                'name': '2-Point Field Goal Percentage',
-                'abbreviation': '2P%',
-                'description': 'Percent of 2-Point Field Goals made'
-            },
-            'efg_pct': {
-                'name': 'Effective Field Goal Percentage',
-                'abbreviation': 'eFG%',
-                'description': 'Weighted combined Field Goal Percentage between 3 and 2-Pointers'
-            },
-            'ft': {
-                'name': 'Free Throws',
-                'abbreviation': 'FT',
-                'description': 'Free Throws made'
-            },
-            'fta': {
-                'name': 'Free Throw Attempts',
-                'abbreviation': 'FTA',
-                'description': 'Free Throws attempted'
-            },
-            'ft_pct': {
-                'name': 'Free Throw Percentage',
-                'abbreviation': 'FT%',
-                'description': 'Percent of Free Throws made'
-            },
-            'orb': {
-                'name': 'Offensive Rebounds',
-                'abbreviation': 'ORB',
-                'description': 'Rebounds while on offense'
-            },
-            'drb': {
-                'name': 'Defensive Rebounds',
-                'abbreviation': 'DRB',
-                'description': 'Rebounds while on defense'
-            },
-            'trb': {
-                'name': 'Total Rebounds',
-                'abbreviation': 'TRB',
-                'description': 'Total Rebounds made'
-            },
-            'ast': {
-                'name': 'Assists',
-                'abbreviation': 'AST',
-                'description': 'Passes made that led to a made basket'
-            },
-            'stl': {
-                'name': 'Steals',
-                'abbreviation': 'STL',
-                'description': 'Balls taken from offensive team'
-            },
-            'blk': {
-                'name': 'Blocks',
-                'abbreviation': 'BLK',
-                'description': 'Shots blocked while on defense'
-            },
-            'tov': {
-                'name': 'Turnovers',
-                'abbreviation': 'TOV',
-                'description': 'Balls lost to defensive team'
-            },
-            'pf': {
-                'name': 'Personal Fouls',
-                'abbreviation': 'PF',
-                'description': 'Fouls committed'
-            },
-            'pts': {
-                'name': 'Points',
-                'abbreviation': 'PTS',
-                'description': 'buckets.'
-            }
-        }
+METRICS_STATS = {
+    TOTALS_METRIC: {
+        'fg': { 'type': IntField() },
+        'fga': { 'type': IntField() },
+        'fg_pct': { 'type': FloatField() },
+        'fg3': { 'type': IntField() },
+        'fg3a': { 'type': IntField() },
+        'fg3_pct': { 'type': FloatField() },
+        'fg2': { 'type': IntField() },
+        'fg2a': { 'type': IntField() },
+        'fg2_pct': { 'type': FloatField() },
+        'efg_pct': { 'type': FloatField() },
+        'ft': { 'type': IntField() },
+        'fta': { 'type': IntField() },
+        'ft_pct': { 'type': FloatField() },
+        'orb': { 'type': IntField() },
+        'drb': { 'type': IntField() },
+        'trb': { 'type': IntField() },
+        'ast': { 'type': IntField() },
+        'stl': { 'type': IntField() },
+        'blk': { 'type': IntField() },
+        'tov': { 'type': IntField() },
+        'pf': { 'type': IntField() },
+        'pts': { 'type': IntField() }
     },
-    METRICS_CATEGORIES['per_g']['name']: {
-        'name': 'Per Game',
-        'description': 'Per Game Averages',
-        'stats': {
-            'fg_per_g': {
-                'name': 'Field Goals',
-                'abbreviation': 'FG',
-                'description': 'Field Goals made'
-            },
-            'fga_per_g': {
-                'name': 'Field Goal Attempts',
-                'abbreviation': 'FGA',
-                'description': 'Field Goals attempted'
-            },
-            'fg_pct': {
-                'name': 'Field Goal Percentage',
-                'abbreviation': 'FG%',
-                'description': 'Percent of Field Goals made'
-            },
-            'fg3_per_g': {
-                'name': '3-Point Field Goals',
-                'abbreviation': '3P',
-                'description': '3-Point Field Goals made'
-            },
-            'fg3a_per_g': {
-                'name': '3-Point Field Goal Attempts',
-                'abbreviation': '3PA',
-                'description': '3-Point Field Goals attempted'
-            },
-            'fg3_pct': {
-                'name': '3-Point Field Goal Percentage',
-                'abbreviation': '3P%',
-                'description': 'Percent of 3-Point Field Goals made'
-            },
-            'fg2_per_g': {
-                'name': '2-Point Field Goals',
-                'abbreviation': '2P',
-                'description': '2-Point Field Goals made'
-            },
-            'fg2a_per_g': {
-                'name': '2-Point Field Goal Attempts',
-                'abbreviation': '2PA',
-                'description': '2-Point Field Goals attempted'
-            },
-            'fg2_pct': {
-                'name': '2-Point Field Goal Percentage',
-                'abbreviation': '2P%',
-                'description': 'Percent of 2-Point Field Goals made'
-            },
-            'efg_pct': {
-                'name': 'Effective Field Goal Percentage',
-                'abbreviation': 'eFG%',
-                'description': 'Weighted combined Field Goal Percentage between 3 and 2-Pointers'
-            },
-            'ft_per_g': {
-                'name': 'Free Throws',
-                'abbreviation': 'FT',
-                'description': 'Free Throws made'
-            },
-            'fta_per_g': {
-                'name': 'Free Throw Attempts',
-                'abbreviation': 'FTA',
-                'description': 'Free Throws attempted'
-            },
-            'ft_pct': {
-                'name': 'Free Throw Percentage',
-                'abbreviation': 'FT%',
-                'description': 'Percent of Free Throws made'
-            },
-            'orb_per_g': {
-                'name': 'Offensive Rebounds',
-                'abbreviation': 'ORB',
-                'description': 'Rebounds while on offense'
-            },
-            'drb_per_g': {
-                'name': 'Defensive Rebounds',
-                'abbreviation': 'DRB',
-                'description': 'Rebounds while on defense'
-            },
-            'trb_per_g': {
-                'name': 'Total Rebounds',
-                'abbreviation': 'TRB',
-                'description': 'Total Rebounds made'
-            },
-            'ast_per_g': {
-                'name': 'Assists',
-                'abbreviation': 'AST',
-                'description': 'Passes made that led to a made basket'
-            },
-            'stl_per_g': {
-                'name': 'Steals',
-                'abbreviation': 'STL',
-                'description': 'Balls taken from offensive team'
-            },
-            'blk_per_g': {
-                'name': 'Blocks',
-                'abbreviation': 'BLK',
-                'description': 'Shots blocked while on defense'
-            },
-            'tov_per_g': {
-                'name': 'Turnovers',
-                'abbreviation': 'TOV',
-                'description': 'Balls lost to defensive team'
-            },
-            'pf_per_g': {
-                'name': 'Personal Fouls',
-                'abbreviation': 'PF',
-                'description': 'Fouls committed'
-            },
-            'pts_per_g': {
-                'name': 'Points',
-                'abbreviation': 'PTS',
-                'description': 'buckets.'
-            }
-        }
-    }
+    PER_G_METRIC: {
+        'fg': { 'type': FloatField() },
+        'fga': { 'type': FloatField() },
+        'fg_pct': { 'type': FloatField() },
+        'fg3': { 'type': FloatField() },
+        'fg3a': { 'type': FloatField() },
+        'fg3_pct': { 'type': FloatField() },
+        'fg2': { 'type': FloatField() },
+        'fg2a': { 'type': FloatField() },
+        'fg2_pct': { 'type': FloatField() },
+        'efg_pct': { 'type': FloatField() },
+        'ft': { 'type': FloatField() },
+        'fta': { 'type': FloatField() },
+        'ft_pct': { 'type': FloatField() },
+        'orb': { 'type': FloatField() },
+        'drb': { 'type': FloatField() },
+        'trb': { 'type': FloatField() },
+        'ast': { 'type': FloatField() },
+        'stl': { 'type': FloatField() },
+        'blk': { 'type': FloatField() },
+        'tov': { 'type': FloatField() },
+        'pf': { 'type': FloatField() },
+        'pts': { 'type': FloatField() }
+    },
+    PER_M_METRIC: {},
+    PER_P_METRIC: {},
+    ADV_METRIC: {},
+    PBP_METRIC: {},
+    SHOOTING_METRIC: {},
+    ADV_SHOOTING_METRIC: {}
 }

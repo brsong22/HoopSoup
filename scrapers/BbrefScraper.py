@@ -8,7 +8,7 @@ import urllib.request as request
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bs4 import BeautifulSoup as bs
-from constants.columns import METRICS_CATEGORIES, METRICS_STATS_HEADERS
+from constants.columns import METRICS_CATEGORIES, METRICS_STATS
 
 class BbrefScraper:
     def __init__(self, **kwargs):
@@ -68,12 +68,12 @@ class BbrefScraper:
         for p_row in rows:
             player_name = p_row.find_all('td', attrs={'data-stat': 'name_display'})
             position = p_row.find_all('td', attrs={'data-stat': 'pos'})
-            stats = p_row.find_all('td', attrs={'data-stat': lambda stat: stat in METRICS_STATS_HEADERS[METRICS_CATEGORIES[self.metric_key]['name']]['stats']})
+            stats = p_row.find_all('td', attrs={'data-stat': lambda stat: stat.replace(f'_{self.metric_key}', '') in METRICS_STATS[self.metric_key]})
             player_stats.append({
                 'season': year,
                 'name': player_name[0].text,
                 'position': position[0].text,
-                'stats': {stat.get('data-stat'): float(stat.text) if stat.text else '' for stat in stats}
+                'stats': {stat.get('data-stat').replace(f'_{self.metric_key}', ''): float(stat.text) if stat.text else '' for stat in stats}
             })
         if self.debug:
             self.save_json_to_file(player_stats, year)
