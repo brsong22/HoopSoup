@@ -20,15 +20,21 @@ Prerequisites:
 Popuating MongoDB:
 1. to populate your MongoDB database you can run the `BbrefScraper.py` script
    
-   ```
-   > python -m scrapers.BbrefScraper --metric=per_g --start=2024 --end=2024 --source=url --debug
-   ```
-   - `metric` defines the specific metric we want to pull data for
-   - `start` defines the start of the years range we want to start with to pull data for
-   - `end` defines the end (inclusive) of the years range to pull data for
-   - `source` defines where to pull data from. `url` will pull from Bbref site. `html` will read in html files saved from using `--debug`
-   - `--debug` will save html files and json stats files to provide some visibility in what the scraper is pulling and parsing. it bypasses saving to the database
-   - you can use `--help` to view further info
+    ```
+    > python -m scrapers.BbrefScraper --metric=totals per_m per_g --start=2024 --end=2024 --source=url --debug
+    ```
+    - `metric` defines the metrics we want to pull data for. omit for all metrics.
+    options:
+        - totals `totals`
+        - per game `per_g`
+        - per 36 minutes `per_m`
+        - per 100 possessions `per_p`
+        - advanced `adv`
+        - `start` defines the start of the years range we want to start with to pull data for (inclusive)
+        - `end` defines the end (inclusive) of the years range to pull data for (inclusive)
+    - `source` defines where to pull data from. `url` will pull from Bbref site. `html` will read in html files saved from using `--debug`
+    - `--debug` will save html files and json stats files to provide some visibility in what the scraper is pulling and parsing. it bypasses saving to the database
+    - you can use `--help` to view further info
 
 Running the GraphQL API:
 1. to run the GraphQL API simply run the command
@@ -44,14 +50,12 @@ Running the GraphQL API:
             node {
                 season
                 name
-                stats {
-                    fga
-                    fg
-                    fg2a
-                    fg2
-                    fg3a
-                    fg3
-                }
+                fga
+                fg
+                fg2a
+                fg2
+                fg3a
+                fg3
             }
         }
     }
