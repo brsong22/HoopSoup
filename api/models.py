@@ -1,72 +1,31 @@
+import json
 from mongoengine import Document, EmbeddedDocument
-from mongoengine.fields import EmbeddedDocumentField, IntField, StringField
-from constants.columns import TOTALS_METRIC, PER_G_METRIC, PER_M_METRIC, PER_P_METRIC, ADV_METRIC, PBP_METRIC, SHOOTING_METRIC, ADV_SHOOTING_METRIC, METRICS_STATS
+from mongoengine.fields import EmbeddedDocumentField, FloatField, ListField, StringField
+from constants.metrics import TOTALS_METRIC, PER_G_METRIC, PER_M_METRIC, PER_P_METRIC, ADV_METRIC #, PBP_METRIC, SHOOTING_METRIC, ADJ_SHOOTING_METRIC, METRICS_STATS
 
-def create_stats_embedded_document_class(metric):
-    class_fields = {key: value['type'] for key, value in METRICS_STATS[metric].items()}
-    return type('Stats', (EmbeddedDocument,), class_fields)
+def create_stats_models(metric, model_name):
+    model_fields = {
+        'meta': {'collection': metric},
+        'season': FloatField(),
+        'ranker': FloatField(),
+        'name_display': StringField(),
+        'age': FloatField(),
+        'team_name_abbr': StringField(),
+        'pos': StringField(),
+        'games': FloatField(),
+        'games_started': FloatField(),
+        'mp': FloatField(),
+        'awards': ListField(StringField())
+    }
 
-TotalsStats = create_stats_embedded_document_class(TOTALS_METRIC)
-PerGStats = create_stats_embedded_document_class(PER_G_METRIC)
-PerMStats = create_stats_embedded_document_class(PER_M_METRIC)
-PerPStats = create_stats_embedded_document_class(PER_P_METRIC)
-AdvStats = create_stats_embedded_document_class(ADV_METRIC)
-PbpStats = create_stats_embedded_document_class(PBP_METRIC)
-ShootingStats = create_stats_embedded_document_class(SHOOTING_METRIC)
-AdvShootingStats = create_stats_embedded_document_class(ADV_SHOOTING_METRIC)
+    with open('constants/stat_defs.json', 'r') as stat_def_file:
+        stat_defs = json.load(stat_def_file)
+    model_fields = {**model_fields, **{key: FloatField() if value['type'] == 'float' else StringField() for key, value in stat_defs[metric].items()}}
+    print(model_fields)
+    return type(model_name, (Document,), model_fields)
 
-class PlayerTotalsStats(Document):
-    meta = {'collection': 'totals'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(TotalsStats)
-
-class PlayerPerGStats(Document):
-    meta = {'collection': 'per_g'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(PerGStats)
-
-class PlayerPerMStats(Document):
-    meta = {'collection': 'per_m'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(PerMStats)
-
-class PlayerPerPStats(Document):
-    meta = {'collection': 'per_p'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(PerPStats)
-
-class PlayerAdvStats(Document):
-    meta = {'collection': 'adv'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(AdvStats)
-
-class PlayerPbpStats(Document):
-    meta = {'collection': 'pbp'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(PbpStats)
-
-class PlayerShootingStats(Document):
-    meta = {'collection': 'shooting'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(ShootingStats)
-
-class PlayerAdvShootingStats(Document):
-    meta = {'collection': 'adv_shooting'}
-    season = IntField()
-    name = StringField()
-    position = StringField()
-    stats = EmbeddedDocumentField(AdvShootingStats)
+TotalsStatsModel = create_stats_models(TOTALS_METRIC, 'PlayerTotalsStats')
+PerGStatsModel = create_stats_models(PER_G_METRIC, 'PlayerPerGStats')
+PerMStatsModel = create_stats_models(PER_M_METRIC, 'PlayerPerMStats')
+PerPStatsModel = create_stats_models(PER_P_METRIC, 'PlayerPerPStats')
+AdvStatsModel = create_stats_models(ADV_METRIC, 'PlayerAdvStats')

@@ -72,7 +72,7 @@ class BbrefScraper:
         rows = tbody.find_all('tr', class_=lambda class_: class_ is None or class_ == 'full_table')
         player_stats = []
         for idx, p_row in enumerate(rows):
-            stats_dict = {'season': year, 'stats': {}}
+            stats_dict = {'season': year}
             row_stats = p_row.find_all(attrs={'data-stat': lambda stat: stat in self.stat_defs[metric]})
             row_infos = p_row.find_all(attrs={'data-stat': lambda info: info in GENERAL_INFO.keys()})
             # stats_dict = {**stats_dict, 'stats': {stat.get('data-stat'): float(stat.text) if self.stat_defs[metric][stat.get('data-stat')]['type'] == 'float' and stat.text != '' else stat.text for stat in stats if stat.get('data-stat') not in general_info_stat_keys}}
@@ -91,7 +91,7 @@ class BbrefScraper:
                         if stat_val == '':
                             self.stat_defs[metric][stat_id]['recheck'] = True
                         # print(f'{stat_id} is TYPE string with VALUE {stat_val}')
-                    stats_dict['stats'][stat_id] = stat_val if stat_val != '' else None
+                    stats_dict[stat_id] = stat_val if stat_val != '' else None
                 else:
                     stat_type = self.stat_defs[metric][stat_id]['type']
                     type_recheck = self.stat_defs[metric][stat_id].get('recheck')
@@ -104,7 +104,7 @@ class BbrefScraper:
                             self.stat_defs[metric][stat_id]['recheck'] = False # could maybe just pop this out of dict too
                     # print(f'{stat_id} is TYPE {stat_type} with VALUE {stat.text}')
                     stat_val = None if stat.text == '' else float(stat.text) if stat_type == 'float' else stat.text
-                    stats_dict['stats'][stat_id] = stat_val
+                    stats_dict[stat_id] = stat_val
             for info_stat in row_infos:
                 info_id = info_stat.get('data-stat')
                 info_val = float(info_stat.text) if GENERAL_INFO[info_id]['type'] == 'float' else info_stat.text if info_id != AWARDS_INFO else info_stat.text.split(',') if info_stat.text != '' else []
