@@ -123,12 +123,18 @@ class BbrefScraper:
 
     def __build_stat_defs(self, stat_headers, metric):
         print(f'building {metric} stat defs')
-        self.stat_defs[metric] = {}
+        self.stat_defs[metric] = {
+            'season': {
+                'description': 'Season',
+                'display_name': 'Season',
+                'type': 'float'
+            }
+        }
         for stat in stat_headers:
             stat_header = stat.get_text()
             stat_id = stat.get('data-stat')
             stat_description = stat.get('data-tip') if stat.get('data-tip') else ''
-            if (stat_id not in GENERAL_INFO) and (stat_id != 'DUMMY') and (stat_id != ''):
+            if (stat_id != 'DUMMY') and (stat_id != ''):
                 self.stat_defs[metric][stat_id] = {
                     'description': stat_description,
                     'display_name': stat_header

@@ -1,6 +1,7 @@
 import graphene
 from graphene.relay import Node
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
+from mongoengine.queryset.visitor import Q
 from rapidfuzz import process
 from unidecode import unidecode
 from ..models import TotalsStatsModel, PerGStatsModel, PerMStatsModel, PerPStatsModel, AdvStatsModel
@@ -30,6 +31,13 @@ class PlayerAdvStats(MongoengineObjectType):
         model = AdvStatsModel
         interfaces = (Node,)
 
+def extract_field_filter(kwargs):
+    filter = {}
+    for filter_key, filter_value in kwargs.items():
+        filter[filter_key.replace('_lte', '__lte').replace('_gte', '__gte')] = filter_value
+
+    return filter
+
 def extract_name_filter(**kwargs):
     name_filter = kwargs.pop('name_display', None)
 
@@ -42,12 +50,11 @@ def fuzzy_name_matching(documents, name_filter):
     return matched_names
 
 class Query(graphene.ObjectType):
-    node = Node.Field()
     all_totals = MongoengineConnectionField(PlayerTotalsStats)
     def resolve_all_totals(self, _, **kwargs):
-        print(kwargs)
         name_filter, kwargs = extract_name_filter(**kwargs)
-        totals_query = TotalsStatsModel.objects.filter(**kwargs)
+        field_filter = extract_field_filter(kwargs)
+        totals_query = TotalsStatsModel.objects(Q(**field_filter))
         if name_filter:
             matched_names = fuzzy_name_matching(list(totals_query), name_filter)
             return [totals_query[result[2]] for result in matched_names]
@@ -57,7 +64,8 @@ class Query(graphene.ObjectType):
     all_per_g = MongoengineConnectionField(PlayerPerGStats)
     def resolve_all_per_g(self, _, **kwargs):
         name_filter, kwargs = extract_name_filter(**kwargs)
-        per_g_query = PlayerPerGStats.objects.filter(**kwargs)
+        field_filter = extract_field_filter(kwargs)
+        per_g_query = PerGStatsModel.objects(Q(**field_filter))
         if name_filter:
             matched_names = fuzzy_name_matching(list(per_g_query), name_filter)
             return [per_g_query[result[2]] for result in matched_names]
@@ -67,7 +75,8 @@ class Query(graphene.ObjectType):
     all_per_m = MongoengineConnectionField(PlayerPerMStats)
     def resolve_all_per_m(self, _, **kwargs):
         name_filter, kwargs = extract_name_filter(**kwargs)
-        per_m_query = PlayerPerMStats.objects.filter(**kwargs)
+        field_filter = extract_field_filter(kwargs)
+        per_m_query = PerMStatsModel.objects(Q(**field_filter))
         if name_filter:
             matched_names = fuzzy_name_matching(list(per_m_query), name_filter)
             return [per_m_query[result[2]] for result in matched_names]
@@ -77,7 +86,8 @@ class Query(graphene.ObjectType):
     all_per_p = MongoengineConnectionField(PlayerPerPStats)
     def resolve_all_per_p(self, _, **kwargs):
         name_filter, kwargs = extract_name_filter(**kwargs)
-        per_p_query = PlayerPerPStats.objects.filter(**kwargs)
+        field_filter = extract_field_filter(kwargs)
+        per_p_query = PerPStatsModel.objects(Q(**field_filter))
         if name_filter:
             matched_names = fuzzy_name_matching(list(per_p_query), name_filter)
             return [per_p_query[result[2]] for result in matched_names]
@@ -87,7 +97,8 @@ class Query(graphene.ObjectType):
     all_adv = MongoengineConnectionField(PlayerAdvStats)
     def resolve_all_adv(self, _, **kwargs):
         name_filter, kwargs = extract_name_filter(**kwargs)
-        adv_query = PlayerAdvStats.objects.filter(**kwargs)
+        field_filter = extract_field_filter(kwargs)
+        adv_query = AdvStatsModel.objects(Q(**field_filter))
         if name_filter:
             matched_names = fuzzy_name_matching(list(adv_query), name_filter)
             return [adv_query[result[2]] for result in matched_names]

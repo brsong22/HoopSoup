@@ -6,6 +6,7 @@ from flask_graphql import GraphQLView
 from mongoengine import connect
 from .schema import schema
 
+load_dotenv()
 mongo_user = os.getenv('MONGO_USER')
 mongo_pass = os.getenv('MONGO_PASSWORD')
 mongo_connection = os.getenv('MONGO_CONNECTION_STRING').format(mongo_user=mongo_user, mongo_password=mongo_pass)
@@ -19,5 +20,4 @@ app.add_url_rule(
 )
 
 if __name__ == '__main__':
-    load_dotenv()
     app.run()
