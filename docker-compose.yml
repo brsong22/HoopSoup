@@ -1,0 +1,14 @@
+services:
+  api:
+    image: python:3.9-slim
+    build: .
+    ports:
+      - ${HOST_PORT}:${CONTAINER_PORT}
+    environment:
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_CONNECTION_STRING: ${MONGO_CONNECTION_STRING}
+    working_dir: /hoopsoup/app
+    volumes:
+      - .:/hoopsoup/app
+    command: python -m api.graphql.api
